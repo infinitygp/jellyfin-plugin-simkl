@@ -264,6 +264,131 @@ namespace Jellyfin.Plugin.Simkl.API
         }
 
         /// <summary>
+        /// Gets last activity timestamps from SIMKL for synchronization purposes.
+        /// </summary>
+        /// <param name="userToken">User authentication token.</param>
+        /// <returns>Activity timestamps for different media types.</returns>
+        public async Task<SyncActivitiesResponse?> GetActivitiesAsync(string userToken)
+        {
+            try
+            {
+                _logger.LogInformation("Getting sync activities");
+                return await Get<SyncActivitiesResponse>("/sync/activities", userToken);
+            }
+            catch (HttpRequestException e) when (e.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                _logger.LogError(e, "Invalid user token for activities request");
+                throw new InvalidTokenException("Invalid user token for activities request");
+            }
+        }
+
+        /// <summary>
+        /// Gets all items from user's SIMKL library.
+        /// </summary>
+        /// <param name="userToken">User authentication token.</param>
+        /// <param name="type">Optional filter by type: anime, shows, movies or null for all.</param>
+        /// <param name="status">Optional filter by status: plantowatch, watching, notinteresting, hold, completed, dropped.</param>
+        /// <param name="dateFrom">Optional date to get items updated after this timestamp.</param>
+        /// <param name="extended">Optional extended info: full for additional metadata.</param>
+        /// <returns>All items from user's library matching filters.</returns>
+        public async Task<SyncAllItemsResponse?> GetAllItemsAsync(
+            string userToken,
+            string? type = null,
+            string? status = null,
+            DateTime? dateFrom = null,
+            string? extended = null)
+        {
+            try
+            {
+                _logger.LogInformation("Getting all items from SIMKL library");
+                var url = "/sync/all-items/";
+
+                if (!string.IsNullOrEmpty(type))
+                {
+                    url += type;
+                    if (!string.IsNullOrEmpty(status))
+                    {
+                        url += "/" + status;
+                    }
+                }
+
+                var queryParams = new System.Collections.Generic.List<string>();
+                if (dateFrom.HasValue)
+                {
+                    queryParams.Add($"date_from={dateFrom.Value:yyyy-MM-dd}");
+                }
+
+                if (!string.IsNullOrEmpty(extended))
+                {
+                    queryParams.Add($"extended={extended}");
+                }
+
+                if (queryParams.Count > 0)
+                {
+                    url += "?" + string.Join("&", queryParams);
+                }
+
+                return await Get<SyncAllItemsResponse>(url, userToken);
+            }
+            catch (HttpRequestException e) when (e.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                _logger.LogError(e, "Invalid user token for all-items request");
+                throw new InvalidTokenException("Invalid user token for all-items request");
+            }
+        }
+
+        /// <summary>
+        /// Adds items to user's SIMKL collection/list.
+        /// </summary>
+        /// <param name="collection">Collection of items to add.</param>
+        /// <param name="userToken">User authentication token.</param>
+        /// <returns>Sync response with added counts.</returns>
+        public async Task<SyncHistoryResponse?> AddToCollectionAsync(SimklCollection collection, string userToken)
+        {
+            try
+            {
+                _logger.LogInformation("Adding items to SIMKL collection");
+                return await Post<SyncHistoryResponse, SimklCollection>("/sync/add-to-list", userToken, collection);
+            }
+            catch (HttpRequestException e) when (e.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                _logger.LogError(e, "Invalid user token for add-to-list request");
+                throw new InvalidTokenException("Invalid user token for add-to-list request");
+            }
+        }
+
+        /// <summary>
+        /// Removes items from user's SIMKL history.
+        /// </summary>
+        /// <param name="history">History object containing items to remove.</param>
+        /// <param name="userToken">User authentication token.</param>
+        /// <returns>Sync response with removed counts.</returns>
+        public async Task<SyncHistoryResponse?> RemoveFromHistoryAsync(SimklHistory history, string userToken)
+        {
+            try
+            {
+                _logger.LogInformation("Removing items from SIMKL history");
+                return await Post<SyncHistoryResponse, SimklHistory>("/sync/history/remove", userToken, history);
+            }
+            catch (HttpRequestException e) when (e.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                _logger.LogError(e, "Invalid user token for history remove request");
+                throw new InvalidTokenException("Invalid user token for history remove request");
+            }
+        }
+
+        /// <summary>
+        /// Syncs watched history to SIMKL (public wrapper for SyncHistoryAsync).
+        /// </summary>
+        /// <param name="history">History object containing items to sync.</param>
+        /// <param name="userToken">User authentication token.</param>
+        /// <returns>Sync response with added counts.</returns>
+        public async Task<SyncHistoryResponse?> SyncHistoryToSimklAsync(SimklHistory history, string userToken)
+        {
+            return await SyncHistoryAsync(history, userToken);
+        }
+
+        /// <summary>
         /// API's private get method, given RELATIVE url and headers.
         /// </summary>
         /// <param name="url">Relative url.</param>

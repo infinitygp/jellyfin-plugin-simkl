@@ -55,6 +55,57 @@
                             Percentage watched needed to scrobble
                         </div>
                     </div>
+                    <h2>Synchronization options:</h2>
+                    <div class="checkboxcontainer">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="SyncLibraryToSimkl"/>
+                            <span>Sync library to SIMKL (Push)</span>
+                        </label>
+                        <div class="fieldDescription">
+                            Export watched items from Jellyfin library to SIMKL via scheduled task
+                        </div>
+                    </div>
+                    <div class="checkboxcontainer">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="SyncHistoryFromSimkl"/>
+                            <span>Import history from SIMKL (Pull)</span>
+                        </label>
+                        <div class="fieldDescription">
+                            Import watch history from SIMKL and mark items as watched in Jellyfin via scheduled task
+                        </div>
+                    </div>
+                    <div class="checkboxcontainer">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="SyncUserDataChanges"/>
+                            <span>Real-time user data sync</span>
+                        </label>
+                        <div class="fieldDescription">
+                            Automatically sync when you mark items as watched/unwatched
+                        </div>
+                    </div>
+                    <div class="checkboxcontainer">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="SyncLibraryChanges"/>
+                            <span>Real-time library sync</span>
+                        </label>
+                        <div class="fieldDescription">
+                            Automatically sync when new items are added to library
+                        </div>
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" id="UserDataSyncDelay" type="number" min="1" max="120" pattern="[0-9]*"
+                               label="User data sync delay (seconds):"/>
+                        <div class="fieldDescription">
+                            Delay before syncing user data changes (allows batching multiple changes)
+                        </div>
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" id="LibrarySyncDelay" type="number" min="1" max="300" pattern="[0-9]*"
+                               label="Library sync delay (seconds):"/>
+                        <div class="fieldDescription">
+                            Delay before syncing library changes (allows batching multiple additions)
+                        </div>
+                    </div>
                     <button is="emby-button" type="submit" class="raised button-submit block"><span>${Save}</span>
                     </button>
                     <button is="emby-button" type="button" class="raised block" onclick="history.back();"><span>${Cancel}</span>
@@ -65,7 +116,7 @@
     </div>
     <script type="text/javascript">
         var SimklConfig = {
-            guid: "07CAEF58-A94B-4211-A62C-F9774E04EBDB",
+            guid: "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
             onLoginProcess: false,
             configCache: [],
             loginTimer: null,
