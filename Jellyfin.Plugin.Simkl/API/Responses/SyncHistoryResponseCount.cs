@@ -1,8 +1,12 @@
-﻿namespace Jellyfin.Plugin.Simkl.API.Responses
+using System.Text.Json.Serialization;
+using Jellyfin.Plugin.Simkl.API.Converters;
+
+namespace Jellyfin.Plugin.Simkl.API.Responses
 {
     /// <summary>
     /// Sync history response count.
     /// </summary>
+    [JsonConverter(typeof(SyncHistoryResponseCountConverter))]
     public class SyncHistoryResponseCount
     {
         /// <summary>

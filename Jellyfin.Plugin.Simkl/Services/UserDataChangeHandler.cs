@@ -108,7 +108,9 @@ namespace Jellyfin.Plugin.Simkl.Services
 
         private void OnUserDataSaved(object? sender, UserDataSaveEventArgs e)
         {
-            if (e.SaveReason == UserDataSaveReason.Import)
+            // Filter out Import and UpdateUserData reasons to prevent syncing during library scans
+            // Only sync when changes are from actual playback (PlaybackProgress, PlaybackFinished)
+            if (e.SaveReason == UserDataSaveReason.Import || e.SaveReason == UserDataSaveReason.UpdateUserData)
             {
                 return;
             }
