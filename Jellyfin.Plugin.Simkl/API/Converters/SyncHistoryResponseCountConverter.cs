@@ -76,24 +76,33 @@ namespace Jellyfin.Plugin.Simkl.API.Converters
             if (reader.TokenType == JsonTokenType.StartArray)
             {
                 int count = 0;
-                while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
+                int depth = 0;
+                const int maxIterations = 10000; // Safety limit to prevent infinite loops
+                int iterations = 0;
+
+                while (reader.Read() && iterations < maxIterations)
                 {
-                    if (reader.TokenType == JsonTokenType.StartObject)
+                    iterations++;
+
+                    if (reader.TokenType == JsonTokenType.EndArray && depth == 0)
+                    {
+                        break;
+                    }
+
+                    // Count any non-null item at the top level of the array
+                    if (depth == 0 && reader.TokenType != JsonTokenType.EndArray)
                     {
                         count++;
-                        // Skip the object content
-                        int depth = 1;
-                        while (depth > 0 && reader.Read())
-                        {
-                            if (reader.TokenType == JsonTokenType.StartObject || reader.TokenType == JsonTokenType.StartArray)
-                            {
-                                depth++;
-                            }
-                            else if (reader.TokenType == JsonTokenType.EndObject || reader.TokenType == JsonTokenType.EndArray)
-                            {
-                                depth--;
-                            }
-                        }
+                    }
+
+                    // Track depth for nested structures
+                    if (reader.TokenType == JsonTokenType.StartObject || reader.TokenType == JsonTokenType.StartArray)
+                    {
+                        depth++;
+                    }
+                    else if (reader.TokenType == JsonTokenType.EndObject || reader.TokenType == JsonTokenType.EndArray)
+                    {
+                        depth--;
                     }
                 }
 
