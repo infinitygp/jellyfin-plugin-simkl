@@ -141,9 +141,7 @@ namespace Jellyfin.Plugin.Simkl.Services
                     return;
                 }
 
-                var allItems = await _simklApi.GetAllItemsAsync(
-                    userConfig.UserToken,
-                    status: "completed");
+                var allItems = await _simklApi.GetAllItemsAsync(userConfig.UserToken);
 
                 if (allItems == null)
                 {
@@ -195,6 +193,12 @@ namespace Jellyfin.Plugin.Simkl.Services
                     break;
                 }
 
+                // Only process items with "completed" status to avoid marking unwatched items
+                if (!string.Equals(simklMovie.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
                 var movie = FindMovieByIds(simklMovie.Movie?.Ids, user);
                 if (movie == null)
                 {
@@ -222,6 +226,12 @@ namespace Jellyfin.Plugin.Simkl.Services
                 if (cancellationToken.IsCancellationRequested)
                 {
                     break;
+                }
+
+                // Only process items with "completed" status to avoid marking unwatched items
+                if (!string.Equals(simklShow.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
                 }
 
                 if (simklShow.Seasons == null)
