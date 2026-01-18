@@ -23,6 +23,7 @@ namespace Jellyfin.Plugin.Simkl.Services
     /// </summary>
     public class SyncFromSimklTask : IScheduledTask
     {
+        private const string CompletedStatus = "completed";
         private readonly ILogger<SyncFromSimklTask> _logger;
         private readonly SimklApi _simklApi;
         private readonly ILibraryManager _libraryManager;
@@ -194,7 +195,7 @@ namespace Jellyfin.Plugin.Simkl.Services
                 }
 
                 // Only process items with "completed" status to avoid marking unwatched items
-                if (!string.Equals(simklMovie.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(simklMovie.Status, CompletedStatus, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -229,7 +230,7 @@ namespace Jellyfin.Plugin.Simkl.Services
                 }
 
                 // Only process items with "completed" status to avoid marking unwatched items
-                if (!string.Equals(simklShow.Status, "completed", StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(simklShow.Status, CompletedStatus, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
