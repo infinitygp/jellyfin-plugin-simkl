@@ -25,7 +25,6 @@ namespace Jellyfin.Plugin.Simkl.Services
     public class SyncUnwatchedMoviesToSimklTask : IScheduledTask
     {
         private const int BatchSize = 100;
-        private const string CompletedStatus = "completed";
         private const string PlanToWatchStatus = "plantowatch";
         private readonly ILogger<SyncUnwatchedMoviesToSimklTask> _logger;
         private readonly SimklApi _simklApi;
@@ -80,7 +79,7 @@ namespace Jellyfin.Plugin.Simkl.Services
             }
 
             var userConfigs = configuration.UserConfigs
-                .Where(c => !string.IsNullOrEmpty(c.UserToken))
+                .Where(c => !string.IsNullOrEmpty(c.UserToken) && c.SyncUnwatchedMoviesToSimkl)
                 .ToList();
 
             if (userConfigs.Count == 0)
@@ -190,26 +189,20 @@ namespace Jellyfin.Plugin.Simkl.Services
 
         private static bool ShouldAddToPlanToWatch(Movie movie, Dictionary<string, string> simklStatuses)
         {
-            // Check if movie already has "completed" or "plantowatch" status in SIMKL
+            // Check if movie already has any status in SIMKL
+            // If it does, don't override it - only add movies that are not in SIMKL yet
             var imdb = movie.GetProviderId(MetadataProvider.Imdb);
             var tmdb = movie.GetProviderId(MetadataProvider.Tmdb);
 
-            if (!string.IsNullOrEmpty(imdb) && simklStatuses.TryGetValue(imdb, out var imdbStatus))
+            // If the movie already exists in SIMKL with any status, don't add it
+            if (!string.IsNullOrEmpty(imdb) && simklStatuses.ContainsKey(imdb))
             {
-                if (string.Equals(imdbStatus, CompletedStatus, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(imdbStatus, PlanToWatchStatus, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
+                return false;
             }
 
-            if (!string.IsNullOrEmpty(tmdb) && simklStatuses.TryGetValue("tmdb:" + tmdb, out var tmdbStatus))
+            if (!string.IsNullOrEmpty(tmdb) && simklStatuses.ContainsKey("tmdb:" + tmdb))
             {
-                if (string.Equals(tmdbStatus, CompletedStatus, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(tmdbStatus, PlanToWatchStatus, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
+                return false;
             }
 
             return true;

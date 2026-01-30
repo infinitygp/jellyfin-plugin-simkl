@@ -22,6 +22,7 @@ namespace Jellyfin.Plugin.Simkl.Configuration
 
             SyncLibraryToSimkl = false;
             SyncHistoryFromSimkl = false;
+            SyncUnwatchedMoviesToSimkl = false;
             SyncUserDataChanges = true;
             SyncLibraryChanges = true;
             UserDataSyncDelay = 10;
@@ -78,6 +79,11 @@ namespace Jellyfin.Plugin.Simkl.Configuration
         /// Gets or sets a value indicating whether to import watch history from SIMKL.
         /// </summary>
         public bool SyncHistoryFromSimkl { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to sync unwatched movies to SIMKL as "plan to watch".
+        /// </summary>
+        public bool SyncUnwatchedMoviesToSimkl { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to sync user data changes in real-time.
